@@ -8,6 +8,9 @@ def get_valid_input():
     else:
         stock = int(stock)
 
+def process_delivery(current_total, new_value):
+    return current_total + new_value
+
 
 
 
