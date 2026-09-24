@@ -1,3 +1,19 @@
+def get_valid_input():
+    stock = input("Enter the stock quantity (or type 'quit' to finish): ")
+    if stock.lower() == 'quit':
+        return 'quit'
+    elif not stock.isdigit():
+        print("Invalid input. Please enter a positive number.")
+        return None
+    else:
+        stock = int(stock)
+
+
+
+
+
+
+
 inventory = 0
 failed_entries = 0
 
