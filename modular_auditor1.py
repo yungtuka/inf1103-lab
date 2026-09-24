@@ -10,6 +10,9 @@ def get_valid_input():
     else:
         return int(stock)
 
+def process_delivery(current_total, new_value):
+   return current_total + new_value
+
 inventory = 0
 failed_entries = 0
 
