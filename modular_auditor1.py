@@ -33,3 +33,31 @@ while True:
 print("\n--- Inventory report: ---")
 print("Total Units Processed:", inventory)
 print("Number of Failed/Rejected Entries:", failed_entries)
+
+def main():
+    inventory = 0
+    deliveries_processed = 0
+    failed_entries = 0
+
+    while True:
+        result = get_valid_input()
+
+        if result == 'quit':
+            break
+        elif result is None:
+            failed_entries += 1
+            continue
+
+        # result is a valid non-negative int
+        inventory = process_delivery(inventory, result)
+        tax = calculate_tax(result)
+        deliveries_processed += 1
+
+        print("Current inventory:", inventory, "| Tax on this delivery:", tax)
+
+        if inventory > 500:
+            print("Warning: Inventory exceeds 500 units.")
+            break
+
+    generate_report(deliveries_processed, failed_entries)
+
