@@ -1,3 +1,5 @@
+TAX_RATE = 0.10
+
 def get_valid_input():
 
     stock = input("Enter the stock quantity (or type 'quit' to finish): ")
@@ -12,6 +14,9 @@ def get_valid_input():
 
 def process_delivery(current_total, new_value):
    return current_total + new_value
+
+def calculate_tax(amount):
+    return amount * TAX_RATE
 
 inventory = 0
 failed_entries = 0
