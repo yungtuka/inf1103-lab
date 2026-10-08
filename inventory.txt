@@ -1,2 +1,2 @@
-Total=175
-History=50,100,25
+Total=185
+History=50,100,25,10

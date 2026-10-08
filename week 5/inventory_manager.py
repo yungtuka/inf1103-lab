@@ -3,6 +3,17 @@ import os
 
 INVENTORY_FILE = "inventory.json"
 
+def load_inventory(filename=INVENTORY_FILE):
+    if os.path.exists(filename):
+        with open(filename, "r") as f:
+            inventory = json.load(f)
+        print(f"{filename} found. Inventory loaded successfully.")
+        return inventory
+    print(f"{filename} not found. Starting with an empty inventory.")
+    return []
+
+        
+
 def find_product(inventory, product_id):
     for product in inventory:
         if product["id"] == product_id:
@@ -45,4 +56,4 @@ inv = []
 add_product(inv, "P001", "Laptop", 1200.00, 15)
 add_product(inv, "P002", "Mouse", 25.50, 40)
 add_product(inv, "P003", "Keyboard", 45.00, 25)
-display_all(inv)
+display_all(load_inventory())

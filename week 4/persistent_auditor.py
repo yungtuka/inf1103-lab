@@ -17,6 +17,12 @@ def load_inventory(filename=INVENTORY_FILE):
         print("No saved inventory found. Starting with an empty inventory.")
     return inventory, history
 
+def save_inventory(inventory, history, filename=INVENTORY_FILE):
+    with open(filename, "w") as f:
+        f.write(f"Total={inventory}\n")
+        f.write("History=" + ",".join(str(x) for x in history) + "\n")
+    print(f"Inventory saved to {filename}.")
+
 def get_valid_input():
 
     stock = input("Enter the stock quantity (or type 'quit' to finish): ")
@@ -68,7 +74,7 @@ def main():
             print("Warning: Inventory exceeds 500 units.")
             break
 
-    
+    save_inventory(inventory, history)
     generate_report(deliveries_processed, failed_entries, history)
 
 if __name__ == "__main__":
