@@ -1,5 +1,13 @@
-class Product:
-    """Represents ONE product and manages its own state (SRP)."""
+from abc import ABC, abstractmethod
+
+
+class Product(ABC):
+    """Represents ONE product and manages its own state (SRP).
+
+    Lab 7: Product is now ABSTRACT. It holds what every product shares,
+    but it cannot be created directly - every product must be either a
+    PhysicalProduct or a DigitalProduct.
+    """
 
     def __init__(self, product_id, name, price, stock):
         self.__product_id = product_id
@@ -31,3 +39,18 @@ class Product:
     def display_information(self):
         print(f"ID: {self.__product_id} | Name: {self.__name} | "
               f"Price: ${self.__price:.2f} | Stock: {self.__stock}")
+
+    # --- Lab 7: data for saving (children add their own fields) ---
+    def to_dict(self):
+        return {
+            "id": self.__product_id,
+            "name": self.__name,
+            "price": self.__price,
+            "stock": self.__stock,
+        }
+
+    # --- Lab 7: abstract method, every child MUST implement it ---
+    @abstractmethod
+    def get_fulfilment_info(self):
+        """Return a message describing how the product is delivered."""
+        pass
