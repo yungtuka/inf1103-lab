@@ -1,7 +1,10 @@
 import json
 import os
 
-from product import Product
+from physical_product import PhysicalProduct
+from digital_product import DigitalProduct
+from can_be_shipped import CanBeShipped
+from product_factory import create_product_from_dict
 from inventory import Inventory
 
 INVENTORY_FILE = "inventory.json"
@@ -11,10 +14,19 @@ INVENTORY_FILE = "inventory.json"
 def load_inventory():
     inventory = Inventory()
     if os.path.exists(INVENTORY_FILE):
-        with open(INVENTORY_FILE, "r") as f:
-            data = json.load(f)
+        try:
+            with open(INVENTORY_FILE, "r") as f:
+                data = json.load(f)
+        except json.JSONDecodeError:
+            print(f"{INVENTORY_FILE} is not valid JSON. Starting with an empty inventory.")
+            return inventory
         for item in data:
-            product = Product(item["id"], item["name"], item["price"], item["stock"])
+            try:
+                # Lab 7: the "type" field decides which subclass is created
+                product = create_product_from_dict(item)
+            except (KeyError, ValueError) as error:
+                print(f"Skipped an entry that could not be loaded: {error}")
+                continue
             inventory.add_product(product)
         print(f"{INVENTORY_FILE} found. Inventory loaded successfully.")
     else:
@@ -23,14 +35,8 @@ def load_inventory():
 
 
 def save_inventory(inventory):
-    data = []
-    for product in inventory.get_products():
-        data.append({
-            "id": product.get_product_id(),
-            "name": product.get_name(),
-            "price": product.get_price(),
-            "stock": product.get_stock(),
-        })
+    # Lab 7: each product builds its own dictionary (incl. type + extra field)
+    data = [product.to_dict() for product in inventory.get_products()]
     with open(INVENTORY_FILE, "w") as f:
         json.dump(data, f, indent=4)
     print("Inventory saved successfully.")
@@ -48,6 +54,48 @@ def show_menu():
     print("----------------")
 
 
+def add_product_flow(inventory):
+    print("\nAdd a new product")
+    print("  1. Physical product")
+    print("  2. Digital product")
+    product_type = input("Choose product type (1-2): ").strip()
+    if product_type not in ("1", "2"):
+        print("Invalid product type. Product was not added.")
+        return
+
+    pid = input("Product ID: ").strip()
+    name = input("Product Name: ").strip()
+    if not pid or not name:
+        print("Product ID and name cannot be empty. Product was not added.")
+        return
+    try:
+        price = float(input("Product Price: ").strip())
+        stock = int(input("Product Stock: ").strip())
+        if price < 0 or stock < 0:
+            print("Price and stock cannot be negative. Product was not added.")
+            return
+        if product_type == "1":
+            weight = float(input("Weight (kg): ").strip())
+            if weight <= 0:
+                print("Weight must be greater than 0. Product was not added.")
+                return
+            product = PhysicalProduct(pid, name, price, stock, weight)
+        else:
+            download_size = float(input("Download size (MB): ").strip())
+            if download_size <= 0:
+                print("Download size must be greater than 0. Product was not added.")
+                return
+            product = DigitalProduct(pid, name, price, stock, download_size)
+    except ValueError:
+        print("Invalid number entered. Product was not added.")
+        return
+
+    if inventory.add_product(product):
+        print("Product added successfully.")
+    else:
+        print(f"Product with ID {pid} already exists.")
+
+
 def main():
     print("--- Inventory Management System ---")
     inventory = load_inventory()
@@ -60,20 +108,7 @@ def main():
             inventory.display_all()
 
         elif choice == "2":
-            print("\nAdd a new product")
-            pid = input("Product ID: ").strip()
-            name = input("Product Name: ").strip()
-            try:
-                price = float(input("Product Price: ").strip())
-                stock = int(input("Product Stock: ").strip())
-            except ValueError:
-                print("Invalid input for price or stock. Product was not added.")
-                continue
-            product = Product(pid, name, price, stock)
-            if inventory.add_product(product):
-                print("Product added successfully.")
-            else:
-                print(f"Product with ID {pid} already exists.")
+            add_product_flow(inventory)
 
         elif choice == "3":
             print("\nUpdate stock of a product")
@@ -101,6 +136,10 @@ def main():
             else:
                 print("Product Found")
                 product.display_information()
+                print(f"    {product.get_fulfilment_info()}")
+                # Only objects that signed the CanBeShipped contract have this
+                if isinstance(product, CanBeShipped):
+                    print(f"    Shipping cost: ${product.calculate_shipping_cost():.2f}")
 
         elif choice == "5":
             print("Saving inventory...")

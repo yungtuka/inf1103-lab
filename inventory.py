@@ -22,7 +22,9 @@ class Inventory:
             print("The inventory is empty.")
         else:
             for product in self.__products:
+                # Lab 7: each object runs its OWN overridden version
                 product.display_information()
+                print(f"    {product.get_fulfilment_info()}")
         print("-------------------------")
 
     def get_products(self):
